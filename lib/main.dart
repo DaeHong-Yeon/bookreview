@@ -1,8 +1,10 @@
 import 'package:bookreview/firebase_options.dart';
 import 'package:bookreview/src/app.dart';
+import 'package:bookreview/src/common/cubit/app_data_load_cubit.dart';
 import 'package:bookreview/src/common/interceptor/custom_interceptor.dart';
 import 'package:bookreview/src/common/model/naver_book_search_option.dart';
 import 'package:bookreview/src/common/repository/naver_api_repository.dart';
+import 'package:bookreview/src/splash/cubit/splash_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -36,29 +38,16 @@ class MyApp extends StatelessWidget {
           create: (context) => NaverBookRepository(dio),
         ),
       ],
-      child: Builder(
-        builder: (context) {
-          return FutureBuilder(
-            future: context.read<NaverBookRepository>().searchBooks(
-                  NaverBookSearchOption.init(query: "서울"),
-                ),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return MaterialApp(
-                  home: Center(
-                    child: Text("${snapshot.data?.items?.length ?? 0}"),
-                  ),
-                );
-              }
-              return Container();
-            },
-          );
-        },
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => AppDataLoadCubit(),
+            lazy: false,
+          ),
+          BlocProvider(create: (context) => SplashCubit()),
+        ],
+        child: App(),
       ),
-      // child: MultiBlocProvider(
-      //   providers: [],
-      //   child: App(),
-      // ),
     );
   }
 }
